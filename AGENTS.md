@@ -15,6 +15,10 @@ Laravel 13 + Inertia 3 + React 19 on Vite+. UI is Astryx (`@astryxdesign/core`) 
 - `amp orb services ensure` starts `laravel` (`php artisan serve`) and `web` (Vite) from `.amp/services.yaml` and prints the portal URL. Vite is the portal's front door and proxies non-asset requests to Laravel; a new root-level module Vite must serve needs adding to the proxy exclusion in `vite.config.ts`.
 - Log in as `test@example.com` / `password`.
 
+## Pull requests
+
+PRs are managed as GitHub stacks with `gh stack` (installed by `.agents/setup`). Add a layer with `gh stack add <branch>` from the top of the stack, publish with `gh stack submit`, and after changing a lower layer run `gh stack rebase` then `gh stack push`. `gh stack view` shows the stack and its PRs.
+
 <!-- ASTRYX:START -->
 Astryx v0.7.17 · 174 components
 CLI: run every command as `npx astryx <cmd>` (shown below as `astryx ...`).

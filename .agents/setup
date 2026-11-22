@@ -9,6 +9,12 @@ if ! command -v php >/dev/null 2>&1 || ! command -v composer >/dev/null 2>&1; th
         php-cli php-sqlite3 php-mbstring php-xml php-curl php-zip php-bcmath php-intl unzip composer
 fi
 
+# GitHub's stacked-PR CLI (`gh stack`); PRs on this repo are managed as stacks.
+# Not fatal: setup should still finish if gh is offline or unauthenticated.
+if ! gh extension list 2>/dev/null | grep -q 'github/gh-stack'; then
+    gh extension install github/gh-stack || echo "warning: could not install gh-stack" >&2
+fi
+
 composer install --no-interaction --no-progress
 npm ci --no-audit --no-fund
 
