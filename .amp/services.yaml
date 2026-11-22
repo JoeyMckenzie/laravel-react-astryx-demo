@@ -1,0 +1,22 @@
+# Orb dev services. Run `amp orb services ensure` to start them and print the portal URL.
+#
+# The browser can only reach one portal origin, so Vite is the front door: it serves
+# assets and HMR itself and proxies every other request to Laravel (see vite.config.ts).
+services:
+    laravel:
+        command: >-
+            php artisan optimize:clear -q &&
+            APP_URL="$LARAVEL_PUBLIC_URL" PHP_CLI_SERVER_WORKERS=4
+            php artisan serve --host=127.0.0.1 --port="$PORT" --no-reload
+        port: 8000
+        env:
+            LARAVEL_PUBLIC_URL: ${services.web.publicURL}
+    web:
+        command: npx vp dev --host 127.0.0.1 --port "$PORT" --strictPort
+        port: 5173
+        env:
+            LARAVEL_DEV_URL: http://127.0.0.1:8000
+        portal:
+            url: /
+            title: App
+            description: Log in as test@example.com with password "password".

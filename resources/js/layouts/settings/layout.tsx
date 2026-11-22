@@ -1,78 +1,60 @@
-import { Link } from '@inertiajs/react';
+import { Heading, Text } from '@astryxdesign/core/Text';
+import { List, ListItem } from '@astryxdesign/core/List';
+import { HStack } from '@astryxdesign/core/HStack';
+import { VStack } from '@astryxdesign/core/VStack';
+import * as stylex from '@stylexjs/stylex';
 import type { PropsWithChildren } from 'react';
-import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import { cn, toUrl } from '@/lib/utils';
+import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import type { NavItem } from '@/types';
 
+const styles = stylex.create({
+    content: {
+        flexGrow: 1,
+        flexBasis: 320,
+        minWidth: 0,
+    },
+});
+
 const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: edit(),
-        icon: null,
-    },
-    {
-        title: 'Security',
-        href: editSecurity(),
-        icon: null,
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
-        icon: null,
-    },
+    { title: 'Profile', href: edit() },
+    { title: 'Security', href: editSecurity() },
+    { title: 'Appearance', href: editAppearance() },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
-        <div className="px-4 py-6">
-            <Heading
-                title="Settings"
-                description="Manage your profile and account settings"
-            />
+        <VStack gap={8}>
+            <VStack gap={1}>
+                <Heading level={2}>Settings</Heading>
+                <Text color="secondary">
+                    Manage your profile and account settings
+                </Text>
+            </VStack>
 
-            <div className="flex flex-col lg:flex-row lg:space-x-12">
-                <aside className="w-full max-w-xl lg:w-48">
-                    <nav
-                        className="flex flex-col space-y-1 space-x-0"
-                        aria-label="Settings"
-                    >
-                        {sidebarNavItems.map((item, index) => (
-                            <Button
-                                key={`${toUrl(item.href)}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn('w-full justify-start', {
-                                    'bg-muted': isCurrentOrParentUrl(item.href),
-                                })}
-                            >
-                                <Link href={item.href}>
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
-                                    )}
-                                    {item.title}
-                                </Link>
-                            </Button>
+            <HStack gap={10} vAlign="start" wrap="wrap">
+                <VStack as="nav" aria-label="Settings" width={192}>
+                    <List density="compact" edge="flush">
+                        {sidebarNavItems.map((item) => (
+                            <ListItem
+                                key={item.title}
+                                label={item.title}
+                                href={toUrl(item.href)}
+                                isSelected={isCurrentOrParentUrl(item.href)}
+                            />
                         ))}
-                    </nav>
-                </aside>
+                    </List>
+                </VStack>
 
-                <Separator className="my-6 lg:hidden" />
-
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">
-                        {children}
-                    </section>
-                </div>
-            </div>
-        </div>
+                <VStack gap={10} maxWidth={640} xstyle={styles.content}>
+                    {children}
+                </VStack>
+            </HStack>
+        </VStack>
     );
 }

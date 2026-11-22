@@ -27,8 +27,10 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-/.agents
-/.amp
+/.agents/*
+!/.agents/setup
+/.amp/*
+!/.amp/services.yaml
 /.claude
 /.codex
 /.cursor
@@ -38,7 +40,6 @@ yarn-error.log
 /.kiro
 /.pi
 /.mcp.json
-/AGENTS.md
 /CLAUDE.md
 /boost.json
 /opencode.json

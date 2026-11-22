@@ -1,37 +1,41 @@
+import { Button } from '@astryxdesign/core/Button';
+import { Card } from '@astryxdesign/core/Card';
+import { FieldStatus } from '@astryxdesign/core/FieldStatus';
+import { HStack } from '@astryxdesign/core/HStack';
+import { Text } from '@astryxdesign/core/Text';
+import { TextInput } from '@astryxdesign/core/TextInput';
+import { VStack } from '@astryxdesign/core/VStack';
 import { usePasskeyRegister } from '@laravel/passkeys/react';
 import { useState } from 'react';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 type Props = {
     onSuccess: () => void;
 };
 
+function defaultPasskeyName(): string {
+    const ua = navigator.userAgent;
+
+    const browser = [
+        { pattern: /Edg|Edge/, name: 'Edge' },
+        { pattern: /OPR|Opera|OPiOS/, name: 'Opera' },
+        { pattern: /Firefox|FxiOS/, name: 'Firefox' },
+        { pattern: /Chrome|CriOS/, name: 'Chrome' },
+        { pattern: /Safari/, name: 'Safari' },
+    ].find(({ pattern }) => pattern.test(ua))?.name;
+
+    const os = [
+        { pattern: /iPhone/, name: 'iPhone' },
+        { pattern: /iPad|Macintosh(?=.*Mobile)/, name: 'iPad' },
+        { pattern: /Android/, name: 'Android' },
+        { pattern: /Mac/, name: 'Mac' },
+        { pattern: /Windows/, name: 'Windows' },
+    ].find(({ pattern }) => pattern.test(ua))?.name;
+
+    return [browser, os].filter(Boolean).join(' on ') || '';
+}
+
 export default function PasskeyRegistration({ onSuccess }: Props) {
-    const [name, setName] = useState(() => {
-        const ua = navigator.userAgent;
-
-        const browser = [
-            { pattern: /Edg|Edge/, name: 'Edge' },
-            { pattern: /OPR|Opera|OPiOS/, name: 'Opera' },
-            { pattern: /Firefox|FxiOS/, name: 'Firefox' },
-            { pattern: /Chrome|CriOS/, name: 'Chrome' },
-            { pattern: /Safari/, name: 'Safari' },
-        ].find(({ pattern }) => pattern.test(ua))?.name;
-
-        const os = [
-            { pattern: /iPhone/, name: 'iPhone' },
-            { pattern: /iPad|Macintosh(?=.*Mobile)/, name: 'iPad' },
-            { pattern: /Android/, name: 'Android' },
-            { pattern: /Mac/, name: 'Mac' },
-            { pattern: /Windows/, name: 'Windows' },
-        ].find(({ pattern }) => pattern.test(ua))?.name;
-
-        return [browser, os].filter(Boolean).join(' on ') || '';
-    });
-
+    const [name, setName] = useState(defaultPasskeyName);
     const [showForm, setShowForm] = useState(false);
     const { register, isLoading, error, isSupported } = usePasskeyRegister({
         onSuccess: () => {
@@ -41,68 +45,68 @@ export default function PasskeyRegistration({ onSuccess }: Props) {
         },
     });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!name.trim()) {
-            return;
-        }
-
-        await register(name);
-    };
-
-    const handleCancel = () => {
-        setShowForm(false);
-        setName('');
-    };
-
     if (!isSupported) {
         return (
-            <div className="text-sm text-muted-foreground">
+            <Text color="secondary">
                 Passkeys are not supported in this browser.
-            </div>
+            </Text>
         );
     }
 
     if (!showForm) {
         return (
-            <Button variant="outline" onClick={() => setShowForm(true)}>
-                Add passkey
-            </Button>
+            <HStack>
+                <Button label="Add passkey" onClick={() => setShowForm(true)} />
+            </HStack>
         );
     }
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="space-y-4 rounded-lg border border-border bg-muted/50 p-4"
-        >
-            <div className="grid gap-2">
-                <Label htmlFor="passkey-name">Passkey name</Label>
-                <Input
-                    id="passkey-name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g., MacBook Pro, iPhone"
-                    className="mt-1 block w-full border-foreground/20"
-                    autoFocus
-                />
-                <p className="text-xs text-muted-foreground">
-                    A name helps you identify this passkey later.
-                </p>
-            </div>
+        <Card variant="muted">
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
 
-            {error && <InputError message={error} />}
-
-            <div className="flex gap-2">
-                <Button type="submit" disabled={isLoading || !name.trim()}>
-                    {isLoading ? 'Registering...' : 'Register passkey'}
-                </Button>
-                <Button type="button" variant="ghost" onClick={handleCancel}>
-                    Cancel
-                </Button>
-            </div>
-        </form>
+                    if (name.trim()) {
+                        void register(name);
+                    }
+                }}
+            >
+                <VStack gap={4}>
+                    <TextInput
+                        label="Passkey name"
+                        description="A name helps you identify this passkey later."
+                        value={name}
+                        onChange={setName}
+                        placeholder="e.g., MacBook Pro, iPhone"
+                        hasAutoFocus
+                    />
+                    {error && (
+                        <FieldStatus
+                            type="error"
+                            message={error}
+                            variant="detached"
+                        />
+                    )}
+                    <HStack gap={2}>
+                        <Button
+                            type="submit"
+                            label="Register passkey"
+                            variant="primary"
+                            isLoading={isLoading}
+                            isDisabled={!name.trim()}
+                        />
+                        <Button
+                            label="Cancel"
+                            variant="ghost"
+                            onClick={() => {
+                                setShowForm(false);
+                                setName('');
+                            }}
+                        />
+                    </HStack>
+                </VStack>
+            </form>
+        </Card>
     );
 }

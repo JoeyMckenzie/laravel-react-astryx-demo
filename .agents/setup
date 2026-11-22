@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Prepares a fresh Amp orb: PHP + Composer, PHP/JS dependencies, .env, and a seeded SQLite DB.
+# Safe to run repeatedly. Dev servers live in .amp/services.yaml, not here.
+set -euo pipefail
+
+if ! command -v php >/dev/null 2>&1 || ! command -v composer >/dev/null 2>&1; then
+    sudo apt-get update -qq
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+        php-cli php-sqlite3 php-mbstring php-xml php-curl php-zip php-bcmath php-intl unzip composer
+fi
+
+composer install --no-interaction --no-progress
+npm ci --no-audit --no-fund
+
+[ -f .env ] || cp .env.example .env
+grep -q '^APP_KEY=base64:' .env || php artisan key:generate --ansi
+
+if [ ! -f database/database.sqlite ]; then
+    touch database/database.sqlite
+    php artisan migrate --force --seed
+else
+    php artisan migrate --force
+fi
+
+# Wayfinder route helpers (resources/js/routes, resources/js/actions) are generated, not committed.
+php artisan wayfinder:generate --with-form

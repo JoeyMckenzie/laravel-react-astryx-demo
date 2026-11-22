@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Amp orb portals terminate HTTPS and forward the request to the local dev server.
+        if (env('AMP_ORB')) {
+            $middleware->trustProxies(at: '*');
+        }
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [
