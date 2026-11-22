@@ -16,7 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Amp orb portals terminate HTTPS and forward the request to the local dev server.
-        if (env('AMP_ORB')) {
+        // AMP_ORB is set by the orb's process environment (not .env), and config is not loaded yet here.
+        if (getenv('AMP_ORB')) {
             $middleware->trustProxies(at: '*');
         }
 
