@@ -17,10 +17,10 @@
             })();
         </script>
 
-        {{-- First-paint background before the Astryx theme CSS loads (neutral theme's body color) --}}
+        {{-- First-paint background before the Astryx theme CSS loads (matcha theme's body color) --}}
         <style>
-            html { background-color: #f1f1f1; color-scheme: light; }
-            html[data-theme="dark"] { background-color: #1b1b1b; color-scheme: dark; }
+            html { background-color: #f0f0e0; color-scheme: light; }
+            html[data-theme="dark"] { background-color: #12140e; color-scheme: dark; }
         </style>
 
         <link rel="icon" href="/favicon.ico" sizes="any">
