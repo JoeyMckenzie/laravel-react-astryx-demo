@@ -1,19 +1,15 @@
+import { Button } from '@astryxdesign/core/Button';
+import { VStack } from '@astryxdesign/core/VStack';
 import { Form, Head } from '@inertiajs/react';
-import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
+import FormTextInput from '@/components/form-text-input';
 import { update } from '@/routes/password';
 
 type Props = {
     token: string;
     email: string;
-    passwordRules: string;
 };
 
-export default function ResetPassword({ token, email, passwordRules }: Props) {
+export default function ResetPassword({ token, email }: Props) {
     return (
         <>
             <Head title="Reset password" />
@@ -24,66 +20,41 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                 resetOnSuccess={['password', 'password_confirmation']}
             >
                 {({ processing, errors }) => (
-                    <div className="grid gap-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                name="email"
-                                autoComplete="email"
-                                value={email}
-                                className="mt-1 block w-full"
-                                readOnly
-                            />
-                            <InputError
-                                message={errors.email}
-                                className="mt-2"
-                            />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <PasswordInput
-                                id="password"
-                                name="password"
-                                autoComplete="new-password"
-                                className="mt-1 block w-full"
-                                autoFocus
-                                placeholder="Password"
-                                passwordrules={passwordRules}
-                            />
-                            <InputError message={errors.password} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="password_confirmation">
-                                Confirm password
-                            </Label>
-                            <PasswordInput
-                                id="password_confirmation"
-                                name="password_confirmation"
-                                autoComplete="new-password"
-                                className="mt-1 block w-full"
-                                placeholder="Confirm password"
-                                passwordrules={passwordRules}
-                            />
-                            <InputError
-                                message={errors.password_confirmation}
-                                className="mt-2"
-                            />
-                        </div>
-
+                    <VStack gap={4}>
+                        <FormTextInput
+                            name="email"
+                            label="Email"
+                            type="email"
+                            autoComplete="email"
+                            defaultValue={email}
+                            isReadOnly
+                            error={errors.email}
+                        />
+                        <FormTextInput
+                            name="password"
+                            label="Password"
+                            type="password"
+                            autoComplete="new-password"
+                            hasAutoFocus
+                            placeholder="Password"
+                            error={errors.password}
+                        />
+                        <FormTextInput
+                            name="password_confirmation"
+                            label="Confirm password"
+                            type="password"
+                            autoComplete="new-password"
+                            placeholder="Confirm password"
+                            error={errors.password_confirmation}
+                        />
                         <Button
                             type="submit"
-                            className="mt-4 w-full"
-                            disabled={processing}
-                            data-test="reset-password-button"
-                        >
-                            {processing && <Spinner />}
-                            Reset password
-                        </Button>
-                    </div>
+                            label="Reset password"
+                            variant="primary"
+                            size="lg"
+                            isLoading={processing}
+                        />
+                    </VStack>
                 )}
             </Form>
         </>

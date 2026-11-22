@@ -1,15 +1,13 @@
+import { Banner } from '@astryxdesign/core/Banner';
+import { Button } from '@astryxdesign/core/Button';
+import { Card } from '@astryxdesign/core/Card';
+import { HStack } from '@astryxdesign/core/HStack';
+import { Skeleton } from '@astryxdesign/core/Skeleton';
+import { Heading, Text } from '@astryxdesign/core/Text';
+import { VStack } from '@astryxdesign/core/VStack';
 import { Form } from '@inertiajs/react';
-import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import AlertError from '@/components/alert-error';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
 
 type Props = {
@@ -23,26 +21,7 @@ export default function TwoFactorRecoveryCodes({
     fetchRecoveryCodes,
     errors,
 }: Props) {
-    const [codesAreVisible, setCodesAreVisible] = useState<boolean>(false);
-    const codesSectionRef = useRef<HTMLDivElement | null>(null);
-    const canRegenerateCodes = recoveryCodesList.length > 0 && codesAreVisible;
-
-    const toggleCodesVisibility = useCallback(async () => {
-        if (!codesAreVisible && !recoveryCodesList.length) {
-            await fetchRecoveryCodes();
-        }
-
-        setCodesAreVisible(!codesAreVisible);
-
-        if (!codesAreVisible) {
-            setTimeout(() => {
-                codesSectionRef.current?.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest',
-                });
-            });
-        }
-    }, [codesAreVisible, recoveryCodesList.length, fetchRecoveryCodes]);
+    const [codesAreVisible, setCodesAreVisible] = useState(false);
 
     useEffect(() => {
         if (!recoveryCodesList.length) {
@@ -50,36 +29,32 @@ export default function TwoFactorRecoveryCodes({
         }
     }, [recoveryCodesList.length, fetchRecoveryCodes]);
 
-    const RecoveryCodeIconComponent = codesAreVisible ? EyeOff : Eye;
-
     return (
         <Card>
-            <CardHeader>
-                <CardTitle className="flex gap-3">
-                    <LockKeyhole className="size-4" aria-hidden="true" />
-                    2FA recovery codes
-                </CardTitle>
-                <CardDescription>
-                    Recovery codes let you regain access if you lose your 2FA
-                    device. Store them in a secure password manager.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="flex flex-col gap-3 select-none sm:flex-row sm:items-center sm:justify-between">
-                    <Button
-                        onClick={toggleCodesVisibility}
-                        className="w-fit"
-                        aria-expanded={codesAreVisible}
-                        aria-controls="recovery-codes-section"
-                    >
-                        <RecoveryCodeIconComponent
-                            className="size-4"
-                            aria-hidden="true"
-                        />
-                        {codesAreVisible ? 'Hide' : 'View'} recovery codes
-                    </Button>
+            <VStack gap={4}>
+                <VStack gap={1}>
+                    <Heading level={4}>2FA recovery codes</Heading>
+                    <Text color="secondary">
+                        Recovery codes let you regain access if you lose your
+                        2FA device. Store them in a secure password manager.
+                    </Text>
+                </VStack>
 
-                    {canRegenerateCodes && (
+                <HStack gap={2} hAlign="between" wrap="wrap">
+                    <Button
+                        label={`${codesAreVisible ? 'Hide' : 'View'} recovery codes`}
+                        variant="primary"
+                        icon={
+                            codesAreVisible ? (
+                                <EyeOff size={16} />
+                            ) : (
+                                <Eye size={16} />
+                            )
+                        }
+                        onClick={() => setCodesAreVisible(!codesAreVisible)}
+                        aria-expanded={codesAreVisible}
+                    />
+                    {codesAreVisible && recoveryCodesList.length > 0 && (
                         <Form
                             {...regenerateRecoveryCodes.form()}
                             options={{ preserveScroll: true }}
@@ -87,78 +62,54 @@ export default function TwoFactorRecoveryCodes({
                         >
                             {({ processing }) => (
                                 <Button
-                                    variant="secondary"
                                     type="submit"
-                                    disabled={processing}
-                                    aria-describedby="regenerate-warning"
-                                >
-                                    <RefreshCw /> Regenerate codes
-                                </Button>
+                                    label="Regenerate codes"
+                                    icon={<RefreshCw size={16} />}
+                                    isLoading={processing}
+                                />
                             )}
                         </Form>
                     )}
-                </div>
-                <div
-                    id="recovery-codes-section"
-                    className={`relative overflow-hidden transition-all duration-300 ${codesAreVisible ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}
-                    aria-hidden={!codesAreVisible}
-                >
-                    <div className="mt-3 space-y-3">
-                        {errors?.length ? (
-                            <AlertError errors={errors} />
-                        ) : (
-                            <>
-                                <div
-                                    ref={codesSectionRef}
-                                    className="grid gap-1 rounded-lg bg-muted p-4 font-mono text-sm"
-                                    role="list"
-                                    aria-label="Recovery codes"
-                                >
-                                    {recoveryCodesList.length ? (
-                                        recoveryCodesList.map((code, index) => (
-                                            <div
-                                                key={index}
-                                                role="listitem"
-                                                className="select-text"
-                                            >
-                                                {code}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div
-                                            className="space-y-2"
-                                            aria-label="Loading recovery codes"
-                                        >
-                                            {Array.from(
-                                                { length: 8 },
-                                                (_, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="h-4 animate-pulse rounded bg-muted-foreground/20"
-                                                        aria-hidden="true"
-                                                    />
-                                                ),
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                </HStack>
 
-                                <div className="text-xs text-muted-foreground select-none">
-                                    <p id="regenerate-warning">
-                                        Each recovery code can be used once to
-                                        access your account and will be removed
-                                        after use. If you need more, click{' '}
-                                        <span className="font-bold">
-                                            Regenerate codes
-                                        </span>{' '}
-                                        above.
-                                    </p>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </CardContent>
+                {codesAreVisible &&
+                    (errors.length ? (
+                        <Banner
+                            status="error"
+                            title="Something went wrong."
+                            description={Array.from(new Set(errors)).join(' ')}
+                        />
+                    ) : (
+                        <VStack gap={3}>
+                            <Card variant="muted">
+                                <VStack gap={1} aria-label="Recovery codes">
+                                    {recoveryCodesList.length
+                                        ? recoveryCodesList.map((code) => (
+                                              <Text key={code} type="code">
+                                                  {code}
+                                              </Text>
+                                          ))
+                                        : Array.from({ length: 8 }, (_, i) => (
+                                              <Skeleton
+                                                  key={i}
+                                                  index={i}
+                                                  height={16}
+                                              />
+                                          ))}
+                                </VStack>
+                            </Card>
+                            <Text type="supporting" color="secondary">
+                                Each recovery code can be used once to access
+                                your account and will be removed after use. If
+                                you need more, click{' '}
+                                <Text type="inherit" weight="bold">
+                                    Regenerate codes
+                                </Text>{' '}
+                                above.
+                            </Text>
+                        </VStack>
+                    ))}
+            </VStack>
         </Card>
     );
 }

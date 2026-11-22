@@ -1,36 +1,46 @@
+import { Card } from '@astryxdesign/core/Card';
+import { Grid } from '@astryxdesign/core/Grid';
+import { Skeleton } from '@astryxdesign/core/Skeleton';
+import { Heading, Text } from '@astryxdesign/core/Text';
+import { VStack } from '@astryxdesign/core/VStack';
 import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { dashboard } from '@/routes';
+
+const tiles = ['Revenue', 'Active users', 'Open issues'];
 
 export default function Dashboard() {
     return (
         <>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
-            </div>
+            <VStack gap={4}>
+                <Grid columns={{ minWidth: 240, max: 3 }} gap={4}>
+                    {tiles.map((title, index) => (
+                        <Card key={title}>
+                            <VStack gap={3}>
+                                <Text color="secondary">{title}</Text>
+                                <Skeleton
+                                    height={32}
+                                    width="60%"
+                                    index={index}
+                                />
+                                <Skeleton height={96} index={index} />
+                            </VStack>
+                        </Card>
+                    ))}
+                </Grid>
+                <Card minHeight={420}>
+                    <VStack gap={4}>
+                        <Heading level={3}>Activity</Heading>
+                        {Array.from({ length: 6 }, (_, i) => (
+                            <Skeleton key={i} height={20} index={i} />
+                        ))}
+                    </VStack>
+                </Card>
+            </VStack>
         </>
     );
 }
 
 Dashboard.layout = {
-    breadcrumbs: [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-        },
-    ],
+    breadcrumbs: [{ title: 'Dashboard', href: dashboard() }],
 };

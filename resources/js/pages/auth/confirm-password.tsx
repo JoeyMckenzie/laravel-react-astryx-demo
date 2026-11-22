@@ -1,15 +1,13 @@
+import { Button } from '@astryxdesign/core/Button';
+import { VStack } from '@astryxdesign/core/VStack';
 import { Form, Head } from '@inertiajs/react';
-import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { store } from '@/routes/password/confirm';
 import {
     index as confirmOptions,
     store as confirmStore,
 } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyConfirmationController';
+import FormTextInput from '@/components/form-text-input';
 import PasskeyVerify from '@/components/passkey-verify';
+import { store } from '@/routes/password/confirm';
 
 export default function ConfirmPassword() {
     return (
@@ -17,10 +15,7 @@ export default function ConfirmPassword() {
             <Head title="Confirm password" />
 
             <PasskeyVerify
-                routes={{
-                    options: confirmOptions(),
-                    submit: confirmStore(),
-                }}
+                routes={{ options: confirmOptions(), submit: confirmStore() }}
                 label="Confirm with passkey"
                 loadingLabel="Confirming..."
                 separator="Or confirm with password"
@@ -28,31 +23,24 @@ export default function ConfirmPassword() {
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
-                    <div className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <PasswordInput
-                                id="password"
-                                name="password"
-                                placeholder="Password"
-                                autoComplete="current-password"
-                                autoFocus
-                            />
-
-                            <InputError message={errors.password} />
-                        </div>
-
-                        <div className="flex items-center">
-                            <Button
-                                className="w-full"
-                                disabled={processing}
-                                data-test="confirm-password-button"
-                            >
-                                {processing && <Spinner />}
-                                Confirm password
-                            </Button>
-                        </div>
-                    </div>
+                    <VStack gap={4}>
+                        <FormTextInput
+                            name="password"
+                            label="Password"
+                            type="password"
+                            placeholder="Password"
+                            autoComplete="current-password"
+                            hasAutoFocus
+                            error={errors.password}
+                        />
+                        <Button
+                            type="submit"
+                            label="Confirm password"
+                            variant="primary"
+                            size="lg"
+                            isLoading={processing}
+                        />
+                    </VStack>
                 )}
             </Form>
         </>

@@ -10,6 +10,7 @@ export type UseAppearanceReturn = {
 };
 
 const listeners = new Set<() => void>();
+const notify = (): void => listeners.forEach((listener) => listener());
 let currentAppearance: Appearance = 'system';
 
 const prefersDark = (): boolean => {
@@ -41,24 +42,11 @@ const isDarkMode = (appearance: Appearance): boolean => {
     return appearance === 'dark' || (appearance === 'system' && prefersDark());
 };
 
-const applyTheme = (appearance: Appearance): void => {
-    if (typeof document === 'undefined') {
-        return;
-    }
-
-    const isDark = isDarkMode(appearance);
-
-    document.documentElement.classList.toggle('dark', isDark);
-    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
-};
-
 const subscribe = (callback: () => void) => {
     listeners.add(callback);
 
     return () => listeners.delete(callback);
 };
-
-const notify = (): void => listeners.forEach((listener) => listener());
 
 const mediaQuery = (): MediaQueryList | null => {
     if (typeof window === 'undefined') {
@@ -68,7 +56,8 @@ const mediaQuery = (): MediaQueryList | null => {
     return window.matchMedia('(prefers-color-scheme: dark)');
 };
 
-const handleSystemThemeChange = (): void => applyTheme(currentAppearance);
+// Astryx's <Theme mode> owns data-theme on <html>; we only re-render subscribers.
+const handleSystemThemeChange = (): void => notify();
 
 export function initializeTheme(): void {
     if (typeof window === 'undefined') {
@@ -81,7 +70,6 @@ export function initializeTheme(): void {
     }
 
     currentAppearance = getStoredAppearance();
-    applyTheme(currentAppearance);
 
     // Set up system theme change listener
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
@@ -107,7 +95,6 @@ export function useAppearance(): UseAppearanceReturn {
         // Store in cookie for SSR...
         setCookie('appearance', mode);
 
-        applyTheme(mode);
         notify();
     };
 
